@@ -15,4 +15,5 @@ import com.activeandroid.annotation.Table
 class Category : Model() {
     @Column(name = "Name")
     var name :String? = null
+
 }
