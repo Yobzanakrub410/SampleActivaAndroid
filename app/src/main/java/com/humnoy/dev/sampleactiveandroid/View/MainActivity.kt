@@ -1,4 +1,4 @@
-package com.humnoy.dev.sampleactivaandroid
+package com.humnoy.dev.sampleactiveandroid.View
 
 import android.graphics.Typeface
 import android.support.v7.app.AppCompatActivity
@@ -11,31 +11,34 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.activeandroid.query.Delete
 import com.activeandroid.query.Select
+import com.humnoy.dev.sampleactiveandroid.R
+import com.humnoy.dev.sampleactiveandroid.util.ViewUtil
+import com.humnoy.dev.sampleactiveandroid.model.Category
+import com.humnoy.dev.sampleactiveandroid.model.Item
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-
     var etItem : EditText? = null
     var etCategory : EditText? = null
     var recylcer : RecyclerView? = null
-
     var mAdapter : ItemAdapter? = null
-
     var btnSave : Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        ButterKnife.bind(this)
+        ButterKnife.bind(this)
 
-        btnSave = findViewById(R.id.btnSave) as Button
-        etItem = findViewById(R.id.etItem) as EditText
-        etCategory = findViewById(R.id.etCategory) as EditText
-        recylcer = findViewById(R.id.recyclerView) as RecyclerView?
+        val decorView = window.decorView;
+        btnSave = ViewUtil.find(decorView, R.id.btnSave)
+        etItem = ViewUtil.find(decorView, R.id.etItem)
+        etCategory = ViewUtil.find(decorView, R.id.etCategory)
+        recylcer = ViewUtil.find(decorView, R.id.recyclerView)
+
 
         btnSave?.setOnClickListener {
             saveData()
@@ -49,8 +52,14 @@ class MainActivity : AppCompatActivity() {
 
         mAdapter?.list = readDatabaseItem()
 
+        mAdapter?.setOnClickItemListener(object : ItemAdapter.OnItemClickListener {
+            override fun onClick(position: Int, item: Item?) {
+                Log.d("Main","Test $position  ${item?.name}")
+            }
+        })
 
     }
+
 
     @OnClick(R.id.btnSave)
     fun saveData(){
@@ -61,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         val category = Category()
         category.name = categoryString
 
-        val item = Item(name = itemString,category = category)
+        val item = Item(name = itemString, category = category)
 //        //Save To DataBase
         category.save()
         item.save()
@@ -69,22 +78,29 @@ class MainActivity : AppCompatActivity() {
         /*Read*/
         Log.d("Main","save $itemString  $categoryString")
 
-        mAdapter?.notifyDataSetChanged()
         mAdapter?.list = readDatabaseItem()
+        mAdapter?.notifyDataSetChanged()
     }
 
     fun readDatabaseItem() : List<Item>?{
-        return Select().from(Item::class.java).orderBy("Name ASC").execute()
+        return Select().from(Item::class.java).execute()
     }
 
     /*Inner Class*/
     class ItemAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
+
         var list : List<Item>? = null
+        private var onItemClick : OnItemClickListener? = null
+
+        fun setOnClickItemListener( onItemClick : OnItemClickListener?){
+            this.onItemClick = onItemClick;
+        }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
-            var h : ViewHolder = holder as ViewHolder;
-            h.tvItem.setText("Item = ${list?.get(position)?.name}" +
-                    "||| category = ${list?.get(position)?.category?.name}")
+            var mHolder : ViewHolder = holder as ViewHolder;
+
+            mHolder.tvItem.text = "Item = ${list?.get(position)?.name}" +
+                    "||| category = ${list?.get(position)?.category?.name}"
         }
 
         override fun getItemCount(): Int {
@@ -93,14 +109,28 @@ class MainActivity : AppCompatActivity() {
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
             var view : TextView = TextView(parent?.context)
-            view.setTypeface(null,Typeface.BOLD)
-            view.setTextSize(16f)
+            view.setTypeface(null, Typeface.BOLD)
+            view.textSize = 16f
+            view.setPadding(10,10,10,10)
             return ViewHolder(view)
         }
 
-        class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
+
+
+        inner class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
             var tvItem : TextView = itemView as TextView;
+            init{
+                tvItem.setOnClickListener(this)
+            }
+            override fun onClick(v: View?) {
+                onItemClick?.onClick(adapterPosition, list?.get(adapterPosition))
+            }
+
+
         }
 
+        interface OnItemClickListener {
+            fun onClick(position : Int,item : Item?)
+        }
     }
 }

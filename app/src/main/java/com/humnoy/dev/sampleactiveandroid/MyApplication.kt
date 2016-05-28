@@ -1,6 +1,7 @@
-package com.humnoy.dev.sampleactivaandroid
+package com.humnoy.dev.sampleactiveandroid
 
 import com.activeandroid.ActiveAndroid
+import com.activeandroid.app.Application
 
 /**
  * Created by humnoyDeveloper
@@ -8,7 +9,7 @@ import com.activeandroid.ActiveAndroid
  * เวลา 09:50
  * SampleActivaAndroid
  */
-class MyApplication : com.activeandroid.app.Application() {
+class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ActiveAndroid.initialize(this)

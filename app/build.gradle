@@ -17,7 +17,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.humnoy.dev.sampleactivaandroid"
+        applicationId "com.humnoy.dev.sampleactiveandroid"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

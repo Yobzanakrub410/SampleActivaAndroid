@@ -1,4 +1,4 @@
-package com.humnoy.dev.sampleactivaandroid
+package com.humnoy.dev.sampleactiveandroid.model
 
 import com.activeandroid.Model
 import com.activeandroid.annotation.Column
